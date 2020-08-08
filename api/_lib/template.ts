@@ -19,13 +19,13 @@ const mono = readFileSync(`${__dirname}/../_fonts/Vera-Mono.woff2`).toString(
 function getCss(theme: string, fontSize: string) {
   let background = "white";
   let foreground = "black";
-  let radial = "lightgray";
 
   if (theme === "dark") {
     background = "black";
     foreground = "white";
-    radial = "dimgray";
   }
+  console.log(fontSize)
+  
   return `
     @font-face {
         font-family: 'Inter';
@@ -50,13 +50,11 @@ function getCss(theme: string, fontSize: string) {
 
     body {
         background: ${background};
-        background-image: radial-gradient(circle at 25px 25px, ${radial} 2%, transparent 0%), radial-gradient(circle at 75px 75px, ${radial} 2%, transparent 0%);
-        background-size: 100px 100px;
         height: 100vh;
         display: flex;
         text-align: center;
         align-items: center;
-        justify-content: center;
+        padding: 0 6rem;
     }
 
     code {
@@ -70,26 +68,8 @@ function getCss(theme: string, fontSize: string) {
         content: '\`';
     }
 
-    .logo-wrapper {
-        display: flex;
-        align-items: center;
-        align-content: center;
-        justify-content: center;
-        justify-items: center;
-    }
-
-    .logo {
-        margin: 0 75px;
-    }
-
-    .plus {
-        color: #BBB;
-        font-family: Times New Roman, Verdana;
-        font-size: 100px;
-    }
-
     .spacer {
-        margin: 150px;
+        margin: 3rem 0;
     }
 
     .emoji {
@@ -99,17 +79,32 @@ function getCss(theme: string, fontSize: string) {
         vertical-align: -0.1em;
     }
     
+    .text-content{
+        text-align: left;
+    }
+
     .heading {
+        margin-top: 1rem;
+        width: 80%;
         font-family: 'Inter', sans-serif;
-        font-size: ${sanitizeHtml(fontSize)};
+        font-size: calc(${sanitizeHtml(fontSize)} * 2);
         font-style: normal;
         color: ${foreground};
-        line-height: 1.8;
-    }`;
+        line-height: 1.2;
+    }
+    
+    .author {
+        font-family: 'Inter', sans-serif;
+        font-size: calc(${sanitizeHtml(fontSize)} * 1.1);
+        font-weight: light;
+        color: ${foreground};
+        padding-left: 4px;
+    }
+    `;
 }
 
 export function getHtml(parsedReq: ParsedRequest) {
-  const { text, theme, md, fontSize, images, widths, heights } = parsedReq;
+  const { text, theme, md, fontSize } = parsedReq;
   return `<!DOCTYPE html>
 <html>
     <meta charset="utf-8">
@@ -119,36 +114,15 @@ export function getHtml(parsedReq: ParsedRequest) {
         ${getCss(theme, fontSize)}
     </style>
     <body>
-        <div>
-            <div class="spacer">
-            <div class="logo-wrapper">
-                ${images
-                  .map(
-                    (img, i) =>
-                      getPlusSign(i) + getImage(img, widths[i], heights[i])
-                  )
-                  .join("")}
-            </div>
-            <div class="spacer">
+        <div class="text-content">
             <div class="heading">${emojify(
               md ? marked(text) : sanitizeHtml(text)
             )}
             </div>
+            <div class="spacer"></div>
+            <div class="author">${'David Omar'}
+            </div>
         </div>
     </body>
 </html>`;
-}
-
-function getImage(src: string, width = "auto", height = "225") {
-  return `<img
-        class="logo"
-        alt="Generated Image"
-        src="${sanitizeHtml(src)}"
-        width="${sanitizeHtml(width)}"
-        height="${sanitizeHtml(height)}"
-    />`;
-}
-
-function getPlusSign(i: number) {
-  return i === 0 ? "" : '<div class="plus">+</div>';
 }
